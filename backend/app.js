@@ -5,9 +5,16 @@ const postRoutes = require("./routes/postRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const tagRoutes = require("./routes/tagRoutes");
 const authRoutes = require("./routes/authRoutes");
+const cors = require("cors");
 
 const app = express();
 app.use(express.json());
+
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Blog API");

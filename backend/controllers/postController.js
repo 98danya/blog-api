@@ -25,6 +25,25 @@ const getAllPosts = async (req, res) => {
   }
 };
 
+const getPostById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: parseInt(id) },
+      include: { author: true, comments: true, tags: true },
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found." });
+    }
+
+    res.json(post);
+  } catch (err) {
+    console.error("Error fetching post:", err);
+    res.status(500).json({ error: "Failed to fetch post." });
+  }
+};
+
 const createPost = async (req, res) => {
   const { title, content, published, tagNames } = req.body;
   const authorId = req.user.id;
@@ -170,4 +189,4 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { getAllPosts, createPost, updatePost, deletePost };
+module.exports = { getAllPosts, getPostById, createPost, updatePost, deletePost };
