@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getComments, addComment, getUserProfile } from "../utils/api";
+import {
+  getComments,
+  addComment,
+  getUserProfile,
+  getPostLikes,
+  likePost,
+  unlikePost,
+} from "../utils/api";
 import { formatDistanceToNow } from "date-fns";
 
 const PostDetail = () => {
@@ -10,6 +17,8 @@ const PostDetail = () => {
   const [newComment, setNewComment] = useState("");
   const [userId, setUserId] = useState(null);
   const [editingCommentId, setEditingCommentId] = useState(null);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [editedContent, setEditedContent] = useState("");
   const token = localStorage.getItem("token");
 
@@ -34,6 +43,19 @@ const PostDetail = () => {
         .catch((err) => console.error("Failed to load user profile", err));
     }
   }, [id, token]);
+
+  useEffect(() => {
+    if (post) {
+      getPostLikes(post.id)
+        .then((likes) => {
+          setLikeCount(likes.length);
+          if (token && userId) {
+            setLiked(likes.some((like) => like.userId === userId));
+          }
+        })
+        .catch((err) => console.error("Error fetching likes:", err));
+    }
+  }, [post, userId, token]);
 
   const handleCommentSubmit = async (event) => {
     event.preventDefault();
@@ -116,6 +138,26 @@ const PostDetail = () => {
     }
   };
 
+  const toggleLike = async () => {
+    if (!token) {
+      console.log("You must be logged in to like/unlike a post.");
+      return;
+    }
+    try {
+      if (liked) {
+        await unlikePost(post.id, token);
+        setLiked(false);
+        setLikeCount((prev) => prev - 1);
+      } else {
+        await likePost(post.id, token);
+        setLiked(true);
+        setLikeCount((prev) => prev + 1);
+      }
+    } catch (err) {
+      console.error("Error toggling like:", err);
+    }
+  };
+
   if (!post) return <p>Loading...</p>;
 
   return (
@@ -132,12 +174,15 @@ const PostDetail = () => {
         By <strong>{post.author.username}</strong>
       </p>
       <p>
-        {" "}
         {formatDistanceToNow(new Date(post.publishedAt || post.createdAt), {
           addSuffix: true,
         })}
       </p>
       <p>{post.content}</p>
+      
+      <button onClick={toggleLike} disabled={!token}>
+        {liked ? "💔 Unlike" : "❤️ Like"} ({likeCount})
+      </button>
 
       <hr />
       <h2>Comments</h2>

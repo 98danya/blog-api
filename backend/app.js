@@ -3,6 +3,7 @@ const express = require("express");
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const commentRoutes = require("./routes/commentRoutes");
+const likeRoutes = require("./routes/likeRoutes");
 const tagRoutes = require("./routes/tagRoutes");
 const authRoutes = require("./routes/authRoutes");
 const cors = require("cors");
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/likes", likeRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/auth", authRoutes);
 
