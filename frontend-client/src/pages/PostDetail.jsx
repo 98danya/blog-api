@@ -63,21 +63,26 @@ const PostDetail = () => {
   }, [post, userId, token]);
 
   useEffect(() => {
-    const fetchAllCommentLikes = async () => {
-      const likesData = {};
-      await Promise.all(
-        comments.map(async (comment) => {
-          const likes = await getCommentLikes(comment.id);
-          likesData[comment.id] = likes.length;
-        })
-      );
-      setCommentLikes(likesData);
+    const fetchUserCommentLikes = async () => {
+      if (!userId || comments.length === 0) return;
+
+      const updatedLikedComments = {};
+      const updatedCommentLikes = {};
+
+      for (const comment of comments) {
+        const likes = await getCommentLikes(comment.id);
+        updatedLikedComments[comment.id] = likes.some(
+          (like) => like.userId === userId
+        );
+        updatedCommentLikes[comment.id] = likes.length;
+      }
+
+      setLikedComments(updatedLikedComments);
+      setCommentLikes(updatedCommentLikes);
     };
 
-    if (comments.length > 0) {
-      fetchAllCommentLikes();
-    }
-  }, [comments]);
+    fetchUserCommentLikes();
+  }, [userId, comments]);
 
   const handleCommentSubmit = async (event) => {
     event.preventDefault();
