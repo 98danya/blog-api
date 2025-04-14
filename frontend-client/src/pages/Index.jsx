@@ -178,6 +178,13 @@ const Index = () => {
         {filteredPosts.map((post) => (
           <Link key={post.id} to={`/posts/${post.id}`}>
             <div className="post-card">
+              {post.imageUrl && (
+                <img
+                  src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                  alt="Post visual"
+                  style={{ maxWidth: "10%", margin: "1rem 0" }}
+                />
+              )}
               <h2>{post.title}</h2>
               <p>{post.excerpt || post.content.slice(0, 100)}...</p>
             </div>

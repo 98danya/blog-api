@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getComments, addComment, getUserProfile } from "../utils/api";
+import { formatDistanceToNow } from "date-fns";
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -119,7 +120,23 @@ const PostDetail = () => {
 
   return (
     <div>
+      {post.imageUrl && (
+        <img
+          src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+          alt="Post visual"
+          style={{ maxWidth: "40%", margin: "1rem 0" }}
+        />
+      )}
       <h1>{post.title}</h1>
+      <p>
+        By <strong>{post.author.username}</strong>
+      </p>
+      <p>
+        {" "}
+        {formatDistanceToNow(new Date(post.publishedAt || post.createdAt), {
+          addSuffix: true,
+        })}
+      </p>
       <p>{post.content}</p>
 
       <hr />
@@ -130,6 +147,12 @@ const PostDetail = () => {
         comments.map((comment) => (
           <div key={comment.id}>
             <strong>{comment.user?.username || "Anonymous"}:</strong>
+            <br />
+            <small>
+              {formatDistanceToNow(new Date(comment.createdAt), {
+                addSuffix: true,
+              })}
+            </small>
 
             {editingCommentId === comment.id ? (
               <>

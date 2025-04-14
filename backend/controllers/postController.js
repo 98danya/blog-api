@@ -1,4 +1,6 @@
 const prisma = require("../prisma");
+const fs = require("fs");
+const path = require("path");
 
 const getAllPosts = async (req, res) => {
   const { tag } = req.query;
@@ -47,6 +49,7 @@ const getPostById = async (req, res) => {
 const createPost = async (req, res) => {
   const { title, content, published, tagNames } = req.body;
   const authorId = req.user.id;
+  const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
   if (!title || !content) {
     return res.status(400).json({ error: "Title and content are required." });
@@ -94,12 +97,16 @@ const createPost = async (req, res) => {
       title,
       content,
       published,
+      imageUrl,
       author: { connect: { id: authorId } },
       tags: { connect: tags.map((tag) => ({ id: tag.id })) },
     };
 
     if (published) {
       postData.publishedAt = new Date();
+    } else {
+      postData.publishedAt = null;
+      postData.published = false;
     }
 
     const post = await prisma.post.create({
@@ -117,6 +124,7 @@ const createPost = async (req, res) => {
 const updatePost = async (req, res) => {
   const { id } = req.params;
   const { title, content, published, tagNames } = req.body;
+  const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
 
   try {
     const post = await prisma.post.findUnique({
@@ -132,13 +140,15 @@ const updatePost = async (req, res) => {
     if (tagNames && tagNames.length > 0) {
       tags = await Promise.all(
         tagNames.map(async (name) => {
-          let tag = await prisma.tag.findUnique({
-            where: { name: name.toLowerCase() },
+          const tagName = name.trim().toLowerCase();
+
+          let tag = await prisma.tag.findFirst({
+            where: { name: { equals: tagName, mode: "insensitive" } },
           });
 
           if (!tag) {
             tag = await prisma.tag.create({
-              data: { name },
+              data: { name: name.trim() },
             });
           }
 
@@ -155,6 +165,15 @@ const updatePost = async (req, res) => {
         connect: tags.map((tag) => ({ id: tag.id })),
       },
     };
+
+    if (imageUrl) postData.imageUrl = imageUrl;
+
+    if (published) {
+      postData.publishedAt = new Date();
+    } else {
+      postData.publishedAt = null;
+      postData.published = false;
+    }
 
     const updatedPost = await prisma.post.update({
       where: { id: parseInt(id) },
@@ -178,6 +197,17 @@ const deletePost = async (req, res) => {
       return res.status(404).json({ error: "Post not found." });
     }
 
+    if (post.imageUrl) {
+      const imagePath = path.join(__dirname, "..", post.imageUrl);
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          console.error("Failed to delete image file:", err);
+        } else {
+          console.log("Image file deleted:", post.imageUrl);
+        }
+      });
+    }
+
     await prisma.post.delete({
       where: { id: parseInt(id) },
     });
@@ -189,4 +219,10 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { getAllPosts, getPostById, createPost, updatePost, deletePost };
+module.exports = {
+  getAllPosts,
+  getPostById,
+  createPost,
+  updatePost,
+  deletePost,
+};
