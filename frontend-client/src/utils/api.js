@@ -27,11 +27,14 @@ const apiRequest = async (url, method = "GET", body = null, token = null) => {
     }
 
     const contentType = response.headers.get("Content-Type");
+
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json();
       return data;
     } else {
-      throw new Error("Response is not JSON");
+      const responseText = await response.text();
+      console.log("Response is not JSON:", responseText);
+      return responseText;
     }
   } catch (error) {
     throw new Error(error.message || "An unexpected error occurred");
@@ -79,16 +82,48 @@ export const addComment = async (content, postId, userId, token) => {
   );
 };
 
+export const getPostLikes = async (postId) => {
+  return await apiRequest(`/api/likes/post-likes/${postId}`);
+};
+
 export const likePost = async (postId, token) => {
-  return await apiRequest(`/api/likes/${postId}`, "POST", null, token);
+  return await apiRequest(
+    `/api/likes/post-likes/${postId}`,
+    "POST",
+    null,
+    token
+  );
 };
 
 export const unlikePost = async (postId, token) => {
-  return await apiRequest(`/api/likes/${postId}`, "DELETE", null, token);
+  return await apiRequest(
+    `/api/likes/post-likes/${postId}`,
+    "DELETE",
+    null,
+    token
+  );
 };
 
-export const getPostLikes = async (postId) => {
-  return await apiRequest(`/api/likes/${postId}`);
+export const likeComment = async (commentId, token) => {
+  return await apiRequest(
+    `/api/likes/comment-likes/${commentId}`,
+    "POST",
+    null,
+    token
+  );
+};
+
+export const unlikeComment = async (commentId, token) => {
+  return await apiRequest(
+    `/api/likes/comment-likes/${commentId}`,
+    "DELETE",
+    null,
+    token
+  );
+};
+
+export const getCommentLikes = async (commentId) => {
+  return await apiRequest(`/api/likes/comment-likes/${commentId}`);
 };
 
 export const getTags = async () => {

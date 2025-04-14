@@ -7,6 +7,9 @@ import {
   getPostLikes,
   likePost,
   unlikePost,
+  likeComment,
+  unlikeComment,
+  getCommentLikes,
 } from "../utils/api";
 import { formatDistanceToNow } from "date-fns";
 
@@ -19,6 +22,8 @@ const PostDetail = () => {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [likedComments, setLikedComments] = useState({});
+  const [commentLikes, setCommentLikes] = useState({});
   const [editedContent, setEditedContent] = useState("");
   const token = localStorage.getItem("token");
 
@@ -56,6 +61,23 @@ const PostDetail = () => {
         .catch((err) => console.error("Error fetching likes:", err));
     }
   }, [post, userId, token]);
+
+  useEffect(() => {
+    const fetchAllCommentLikes = async () => {
+      const likesData = {};
+      await Promise.all(
+        comments.map(async (comment) => {
+          const likes = await getCommentLikes(comment.id);
+          likesData[comment.id] = likes.length;
+        })
+      );
+      setCommentLikes(likesData);
+    };
+
+    if (comments.length > 0) {
+      fetchAllCommentLikes();
+    }
+  }, [comments]);
 
   const handleCommentSubmit = async (event) => {
     event.preventDefault();
@@ -158,6 +180,29 @@ const PostDetail = () => {
     }
   };
 
+  const likeCommentHandler = async (commentId) => {
+    if (!token) {
+      console.log("You must be logged in to like/unlike a comment.");
+      return;
+    }
+    try {
+      if (likedComments[commentId]) {
+        await unlikeComment(commentId, token);
+        setLikedComments((prev) => ({ ...prev, [commentId]: false }));
+      } else {
+        await likeComment(commentId, token);
+        setLikedComments((prev) => ({ ...prev, [commentId]: true }));
+      }
+      const updatedLikes = await getCommentLikes(commentId);
+      setCommentLikes((prev) => ({
+        ...prev,
+        [commentId]: updatedLikes.length,
+      }));
+    } catch (err) {
+      console.error("Error toggling comment like:", err);
+    }
+  };
+
   if (!post) return <p>Loading...</p>;
 
   return (
@@ -179,10 +224,11 @@ const PostDetail = () => {
         })}
       </p>
       <p>{post.content}</p>
-      
-      <button onClick={toggleLike} disabled={!token}>
-        {liked ? "💔 Unlike" : "❤️ Like"} ({likeCount})
-      </button>
+
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <button onClick={toggleLike}>{liked ? "💔 Unlike" : "❤️ Like"}</button>
+        <span>{likeCount}</span>
+      </div>
 
       <hr />
       <h2>Comments</h2>
@@ -215,6 +261,18 @@ const PostDetail = () => {
             ) : (
               <>
                 <p>{comment.content}</p>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <button onClick={() => likeCommentHandler(comment.id)}>
+                    {likedComments[comment.id] ? "💔 Unlike" : "❤️ Like"}
+                  </button>
+                  <span>{commentLikes[comment.id] || 0}</span>
+                </div>
                 {userId === comment.userId && (
                   <div>
                     <button
