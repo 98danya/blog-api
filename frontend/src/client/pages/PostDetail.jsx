@@ -25,6 +25,7 @@ const PostDetail = () => {
   const [likedComments, setLikedComments] = useState({});
   const [commentLikes, setCommentLikes] = useState({});
   const [editedContent, setEditedContent] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -43,6 +44,7 @@ const PostDetail = () => {
         .then((user) => {
           if (user) {
             setUserId(user.id);
+            setIsAdmin(user.isAdmin);
           }
         })
         .catch((err) => console.error("Failed to load user profile", err));
@@ -278,18 +280,21 @@ const PostDetail = () => {
                   </button>
                   <span>{commentLikes[comment.id] || 0}</span>
                 </div>
-                {userId === comment.userId && (
+                {(userId === comment.userId ||
+                  (isAdmin && userId === post.authorId)) && (
                   <div>
-                    <button
-                      onClick={() =>
-                        startEditingComment(comment.id, comment.content)
-                      }
-                    >
-                      Edit
-                    </button>
                     <button onClick={() => handleDeleteComment(comment.id)}>
                       Delete
                     </button>
+                    {userId === comment.userId && (
+                      <button
+                        onClick={() =>
+                          startEditingComment(comment.id, comment.content)
+                        }
+                      >
+                        Edit
+                      </button>
+                    )}
                   </div>
                 )}
               </>

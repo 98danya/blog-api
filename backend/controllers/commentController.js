@@ -84,31 +84,39 @@ const updateComment = async (req, res) => {
 
 const deleteComment = async (req, res) => {
   const { id } = req.params;
-  const { id: userId } = req.user;
-
-  const comment = await prisma.comment.findUnique({
-    where: { id: parseInt(id) },
-  });
-
-  if (!comment) {
-    return res.status(404).json({ error: "Comment not found." });
-  }
-
-  if (comment.userId !== userId) {
-    return res
-      .status(403)
-      .json({ error: "You can only delete your own comments." });
-  }
+  const { id: userId, isAdmin } = req.user;
 
   try {
+    const comment = await prisma.comment.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        post: true,
+      },
+    });
+
+    if (!comment) {
+      return res.status(404).json({ error: "Comment not found." });
+    }
+
+    const isCommentOwner = comment.userId === userId;
+    const isPostOwner = comment.post.authorId === userId;
+
+    if (!isCommentOwner && !(isAdmin && isPostOwner)) {
+      return res.status(403).json({
+        error: "You are not authorized to delete this comment.",
+      });
+    }
+
     await prisma.comment.delete({
       where: { id: parseInt(id) },
     });
-    res.status(204).end();
+
+    return res.status(204).end();
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Something went wrong while deleting the comment." });
+    console.error("Error deleting comment:", err);
+    res.status(500).json({
+      error: "Something went wrong while deleting the comment.",
+    });
   }
 };
 

@@ -94,12 +94,14 @@ const Dashboard = () => {
       <Link to="/admin/new-post">
         <button>Create New Post</button>
       </Link>
-
       <h2>Published Posts</h2>
       {publishedPosts.length > 0 ? (
         publishedPosts.map((post) => (
           <div key={post.id}>
-            <h3>{post.title}</h3>
+            <Link to={`/posts/${post.id}`}>
+              <h3 style={{ cursor: "pointer", color: "blue" }}>{post.title}</h3>
+              <p>{post.excerpt || post.content.slice(0, 100)}...</p>
+            </Link>
             <button onClick={() => handleDelete(post.id)}>Delete</button>
             <button onClick={() => handleUnpublish(post.id)}>Unpublish</button>
             <Link to={`/admin/edit-post/${post.id}`}>
@@ -115,7 +117,10 @@ const Dashboard = () => {
       {draftPosts.length > 0 ? (
         draftPosts.map((post) => (
           <div key={post.id}>
-            <h3>{post.title}</h3>
+            <Link to={`/posts/${post.id}`}>
+              <h3 style={{ cursor: "pointer", color: "blue" }}>{post.title}</h3>
+              <p>{post.excerpt || post.content.slice(0, 100)}...</p>
+            </Link>
             <button onClick={() => handleDelete(post.id)}>Delete</button>
             <button onClick={() => handlePublish(post.id)}>Publish</button>
             <Link to={`/admin/edit-post/${post.id}`}>
