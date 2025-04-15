@@ -10,96 +10,91 @@ import {
   likeComment,
   unlikeComment,
   getCommentLikes,
+  getPostById,
 } from "../../utils/api";
 import { formatDistanceToNow } from "date-fns";
 
-const PostDetail = () => {
-  const { id } = useParams();
-  const [post, setPost] = useState(null);
+const PostDetail = ({ embeddedPost }) => {
+  const { id: routeId } = useParams();
+  const postId = embeddedPost?.id || routeId;
+  const [post, setPost] = useState(embeddedPost || null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [userId, setUserId] = useState(null);
   const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editedContent, setEditedContent] = useState("");
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [likedComments, setLikedComments] = useState({});
   const [commentLikes, setCommentLikes] = useState({});
-  const [editedContent, setEditedContent] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/posts/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Post not found");
-        return res.json();
-      })
-      .then((data) => setPost(data))
-      .catch((err) => console.error("Error fetching post:", err));
+    const load = async () => {
+      try {
+        if (!embeddedPost) {
+          const postData = await getPostById(postId);
+          setPost(postData);
+        }
 
-    getComments(id).then(setComments);
+        const commentsData = await getComments(postId);
+        setComments(commentsData);
 
-    if (token) {
-      getUserProfile(token)
-        .then((user) => {
-          if (user) {
-            setUserId(user.id);
-            setIsAdmin(user.isAdmin);
-          }
-        })
-        .catch((err) => console.error("Failed to load user profile", err));
-    }
-  }, [id, token]);
+        if (token) {
+          const user = await getUserProfile(token);
+          setUserId(user.id);
+          setIsAdmin(user.isAdmin);
+        }
+      } catch (err) {
+        console.error("Error loading post or comments:", err);
+      }
+    };
+
+    load();
+  }, [postId, embeddedPost, token]);
 
   useEffect(() => {
     if (post) {
-      getPostLikes(post.id)
-        .then((likes) => {
-          setLikeCount(likes.length);
-          if (token && userId) {
-            setLiked(likes.some((like) => like.userId === userId));
-          }
-        })
-        .catch((err) => console.error("Error fetching likes:", err));
+      getPostLikes(post.id).then((likes) => {
+        setLikeCount(likes.length);
+        if (token && userId) {
+          setLiked(likes.some((like) => like.userId === userId));
+        }
+      });
     }
   }, [post, userId, token]);
 
   useEffect(() => {
-    const fetchUserCommentLikes = async () => {
+    const updateCommentLikes = async () => {
       if (!userId || comments.length === 0) return;
 
-      const updatedLikedComments = {};
-      const updatedCommentLikes = {};
+      const updatedLiked = {};
+      const updatedCounts = {};
 
       for (const comment of comments) {
         const likes = await getCommentLikes(comment.id);
-        updatedLikedComments[comment.id] = likes.some(
-          (like) => like.userId === userId
-        );
-        updatedCommentLikes[comment.id] = likes.length;
+        updatedLiked[comment.id] = likes.some((like) => like.userId === userId);
+        updatedCounts[comment.id] = likes.length;
       }
 
-      setLikedComments(updatedLikedComments);
-      setCommentLikes(updatedCommentLikes);
+      setLikedComments(updatedLiked);
+      setCommentLikes(updatedCounts);
     };
 
-    fetchUserCommentLikes();
+    updateCommentLikes();
   }, [userId, comments]);
 
-  const handleCommentSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!newComment || !userId) {
-      console.error("Comment or user ID missing");
-      return;
-    }
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!newComment || !userId) return;
 
     try {
-      const postIdInt = parseInt(id, 10);
-      await addComment(newComment, postIdInt, userId, token);
+      await addComment(newComment, post.id, userId, token);
       setNewComment("");
-      const updatedComments = await getComments(postIdInt);
-      setComments(updatedComments);
+      const updated = await getComments(post.id);
+      setComments(updated);
     } catch (err) {
       console.error("Error adding comment:", err);
     }
@@ -107,7 +102,7 @@ const PostDetail = () => {
 
   const handleDeleteComment = async (commentId) => {
     try {
-      const response = await fetch(
+      const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/comments/${commentId}`,
         {
           method: "DELETE",
@@ -117,8 +112,8 @@ const PostDetail = () => {
         }
       );
 
-      if (response.ok) {
-        setComments(comments.filter((comment) => comment.id !== commentId));
+      if (res.ok) {
+        setComments(comments.filter((c) => c.id !== commentId));
       } else {
         console.error("Error deleting comment");
       }
@@ -127,9 +122,9 @@ const PostDetail = () => {
     }
   };
 
-  const startEditingComment = (commentId, currentContent) => {
+  const startEditingComment = (commentId, content) => {
     setEditingCommentId(commentId);
-    setEditedContent(currentContent);
+    setEditedContent(content);
   };
 
   const cancelEditing = () => {
@@ -139,7 +134,7 @@ const PostDetail = () => {
 
   const saveEditedComment = async (commentId) => {
     try {
-      const response = await fetch(
+      const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/comments/${commentId}`,
         {
           method: "PUT",
@@ -151,13 +146,11 @@ const PostDetail = () => {
         }
       );
 
-      if (response.ok) {
-        const updatedComments = comments.map((comment) =>
-          comment.id === commentId
-            ? { ...comment, content: editedContent }
-            : comment
+      if (res.ok) {
+        const updated = comments.map((c) =>
+          c.id === commentId ? { ...c, content: editedContent } : c
         );
-        setComments(updatedComments);
+        setComments(updated);
         cancelEditing();
       } else {
         console.error("Failed to update comment");
@@ -168,10 +161,8 @@ const PostDetail = () => {
   };
 
   const toggleLike = async () => {
-    if (!token) {
-      console.log("You must be logged in to like/unlike a post.");
-      return;
-    }
+    if (!token) return;
+
     try {
       if (liked) {
         await unlikePost(post.id, token);
@@ -188,22 +179,23 @@ const PostDetail = () => {
   };
 
   const likeCommentHandler = async (commentId) => {
-    if (!token) {
-      console.log("You must be logged in to like/unlike a comment.");
-      return;
-    }
+    if (!token) return;
+
     try {
       if (likedComments[commentId]) {
         await unlikeComment(commentId, token);
-        setLikedComments((prev) => ({ ...prev, [commentId]: false }));
       } else {
         await likeComment(commentId, token);
-        setLikedComments((prev) => ({ ...prev, [commentId]: true }));
       }
+
       const updatedLikes = await getCommentLikes(commentId);
       setCommentLikes((prev) => ({
         ...prev,
         [commentId]: updatedLikes.length,
+      }));
+      setLikedComments((prev) => ({
+        ...prev,
+        [commentId]: !prev[commentId],
       }));
     } catch (err) {
       console.error("Error toggling comment like:", err);
