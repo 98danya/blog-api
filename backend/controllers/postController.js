@@ -3,6 +3,35 @@ const fs = require("fs");
 const path = require("path");
 
 const getAllPosts = async (req, res) => {
+  const { tag, published } = req.query;
+
+  try {
+    const posts = await prisma.post.findMany({
+      where: {
+        ...(published ? { published: published === "true" } : {}),
+        ...(tag
+          ? {
+              tags: {
+                some: {
+                  name: {
+                    equals: tag,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            }
+          : {}),
+      },
+      include: { author: true, comments: true, tags: true },
+    });
+
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch posts." });
+  }
+};
+
+const getPosts = async (req, res) => {
   const { tag } = req.query;
   try {
     const posts = await prisma.post.findMany({
@@ -47,51 +76,40 @@ const getPostById = async (req, res) => {
 };
 
 const createPost = async (req, res) => {
-  const { title, content, published, tagNames } = req.body;
+  let { title, content, published, tagNames } = req.body;
   const authorId = req.user.id;
   const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-  if (!title || !content) {
-    return res.status(400).json({ error: "Title and content are required." });
+  if (!title || !content || !authorId) {
+    return res.status(400).json({ error: "Missing required fields." });
   }
 
-  if (!authorId) {
-    return res.status(400).json({ error: "Author ID is required." });
+  published = published === "true";
+
+  if (typeof tagNames === "string") {
+    try {
+      tagNames = JSON.parse(tagNames);
+    } catch {
+      tagNames = [tagNames];
+    }
   }
 
   try {
-    const author = await prisma.user.findUnique({
-      where: { id: authorId },
-    });
-
-    if (!author) {
-      return res.status(400).json({ error: "Author does not exist." });
-    }
-
-    console.log("Tag Names received:", tagNames);
-
     let tags = [];
-    if (tagNames && tagNames.length > 0) {
+    if (Array.isArray(tagNames)) {
       tags = await Promise.all(
         tagNames.map(async (name) => {
-          const tagName = name.trim();
-
-          let tag = await prisma.tag.findUnique({
-            where: { name: tagName },
+          const tagName = name.trim().toLowerCase();
+          let tag = await prisma.tag.findFirst({
+            where: { name: { equals: tagName, mode: "insensitive" } },
           });
-
           if (!tag) {
-            tag = await prisma.tag.create({
-              data: { name: name.trim() },
-            });
+            tag = await prisma.tag.create({ data: { name: tagName } });
           }
-
           return tag;
         })
       );
     }
-
-    console.log("Tags found or created:", tags);
 
     const postData = {
       title,
@@ -102,12 +120,7 @@ const createPost = async (req, res) => {
       tags: { connect: tags.map((tag) => ({ id: tag.id })) },
     };
 
-    if (published) {
-      postData.publishedAt = new Date();
-    } else {
-      postData.publishedAt = null;
-      postData.published = false;
-    }
+    if (published) postData.publishedAt = new Date();
 
     const post = await prisma.post.create({
       data: postData,
@@ -121,10 +134,58 @@ const createPost = async (req, res) => {
   }
 };
 
+const publishPost = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updatedPost = await prisma.post.update({
+      where: { id: parseInt(id) },
+      data: {
+        published: true,
+        publishedAt: new Date(),
+      },
+    });
+
+    res.json(updatedPost);
+  } catch (err) {
+    console.error("Error publishing post:", err);
+    res.status(500).json({ error: "Failed to publish post." });
+  }
+};
+
+const unpublishPost = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updatedPost = await prisma.post.update({
+      where: { id: parseInt(id) },
+      data: {
+        published: false,
+        publishedAt: null,
+      },
+    });
+
+    res.json(updatedPost);
+  } catch (err) {
+    console.error("Error unpublishing post:", err);
+    res.status(500).json({ error: "Failed to unpublish post." });
+  }
+};
+
 const updatePost = async (req, res) => {
   const { id } = req.params;
-  const { title, content, published, tagNames } = req.body;
+  let { title, content, published, tagNames } = req.body;
   const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
+
+  published = published === "true";
+
+  if (typeof tagNames === "string") {
+    try {
+      tagNames = JSON.parse(tagNames);
+    } catch {
+      tagNames = [tagNames];
+    }
+  }
 
   try {
     const post = await prisma.post.findUnique({
@@ -221,8 +282,11 @@ const deletePost = async (req, res) => {
 
 module.exports = {
   getAllPosts,
+  getPosts,
   getPostById,
   createPost,
+  publishPost,
+  unpublishPost,
   updatePost,
   deletePost,
 };

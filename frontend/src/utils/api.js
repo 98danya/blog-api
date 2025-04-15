@@ -1,9 +1,11 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 const apiRequest = async (url, method = "GET", body = null, token = null) => {
-  const headers = {
-    "Content-Type": "application/json",
-  };
+  const headers = {};
+
+  if (!(body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -12,11 +14,8 @@ const apiRequest = async (url, method = "GET", body = null, token = null) => {
   const options = {
     method,
     headers,
+    body: body instanceof FormData ? body : body ? JSON.stringify(body) : null,
   };
-
-  if (body) {
-    options.body = JSON.stringify(body);
-  }
 
   try {
     const response = await fetch(`${API_URL}${url}`, options);
@@ -27,22 +26,100 @@ const apiRequest = async (url, method = "GET", body = null, token = null) => {
     }
 
     const contentType = response.headers.get("Content-Type");
-
     if (contentType && contentType.includes("application/json")) {
-      const data = await response.json();
-      return data;
+      return await response.json();
     } else {
-      const responseText = await response.text();
-      console.log("Response is not JSON:", responseText);
-      return responseText;
+      return await response.text();
     }
   } catch (error) {
     throw new Error(error.message || "An unexpected error occurred");
   }
 };
 
+export const createPost = async (postData, imageFile, token) => {
+  const formData = new FormData();
+  formData.append("title", postData.title);
+  formData.append("content", postData.content);
+  formData.append("published", String(postData.published));
+
+  if (postData.tagNames && Array.isArray(postData.tagNames)) {
+    postData.tagNames.forEach((tag) => formData.append("tagNames[]", tag));
+  }
+
+  if (imageFile) {
+    formData.append("image", imageFile);
+  }
+
+  return await apiRequest("/api/posts", "POST", formData, token);
+};
+
+export const updatePost = async (id, postData, imageFile, token) => {
+  const formData = new FormData();
+  formData.append("title", postData.title);
+  formData.append("content", postData.content);
+  formData.append("published", postData.published);
+
+  if (postData.tagNames && Array.isArray(postData.tagNames)) {
+    postData.tagNames.forEach((tag) => formData.append("tagNames[]", tag));
+  }
+
+  if (imageFile) {
+    formData.append("image", imageFile);
+  }
+
+  return await apiRequest(`/api/posts/${id}`, "PUT", formData, token);
+};
+
+export const deletePost = async (id, token) => {
+  try {
+    const res = await fetch(`${API_URL}/api/posts/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status === 204) {
+      return { ok: true };
+    } else {
+      const errorText = await res.text();
+      throw new Error(`Failed to delete post: ${res.status} - ${errorText}`);
+    }
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    throw new Error(`Failed to delete post: ${error.message}`);
+  }
+};
+
+export const publishPost = async (postId, token) => {
+  return await apiRequest(`/api/posts/${postId}/publish`, "POST", null, token);
+};
+
+export const unpublishPost = async (postId, token) => {
+  const response = await fetch(`${API_URL}/api/posts/${postId}/unpublish`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to unpublish post");
+  }
+
+  return response.json();
+};
+
 export const getPosts = async () => {
   return await apiRequest("/api/posts?published=true");
+};
+
+export const getAllPosts = async (token) => {
+  const res = await fetch(`${API_URL}/api/posts/all`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.json();
 };
 
 export const getPostById = async (id) => {
@@ -124,6 +201,10 @@ export const unlikeComment = async (commentId, token) => {
 
 export const getCommentLikes = async (commentId) => {
   return await apiRequest(`/api/likes/comment-likes/${commentId}`);
+};
+
+export const createTag = async (name, token) => {
+  return await apiRequest("/api/tags", "POST", { name }, token);
 };
 
 export const getTags = async () => {

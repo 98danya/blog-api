@@ -10,7 +10,7 @@ import {
   likeComment,
   unlikeComment,
   getCommentLikes,
-} from "../utils/api";
+} from "../../utils/api";
 import { formatDistanceToNow } from "date-fns";
 
 const PostDetail = () => {

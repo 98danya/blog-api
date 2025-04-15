@@ -67,6 +67,12 @@ const getProfile = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        isAdmin: true,
+      },
     });
 
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -77,5 +83,4 @@ const getProfile = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user profile." });
   }
 };
-
 module.exports = { login, register, logout, getProfile };
