@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { createPost, createTag, getTags } from "../../utils/api";
+import "../components/NewPost.css";
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -9,6 +10,11 @@ import { Italic } from "@tiptap/extension-italic";
 import { Underline } from "@tiptap/extension-underline";
 import Placeholder from "@tiptap/extension-placeholder";
 import CharacterCount from "@tiptap/extension-character-count";
+import TextStyle from "@tiptap/extension-text-style";
+import Color from "@tiptap/extension-color";
+import Highlight from "@tiptap/extension-highlight";
+import TextAlign from "@tiptap/extension-text-align";
+import ReactMarkdown from "react-markdown";
 
 import TurndownService from "turndown";
 
@@ -20,6 +26,7 @@ const NewPost = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [newTag, setNewTag] = useState("");
   const navigate = useNavigate();
+  const [darkMode, setDarkMode] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -27,12 +34,16 @@ const NewPost = () => {
       Placeholder.configure({
         placeholder: "Start typing your content...",
       }),
-      CharacterCount.configure({
-        limit: 5000,
-      }),
+      CharacterCount.configure({ limit: 5000 }),
       Bold,
       Italic,
       Underline,
+      TextStyle,
+      Color,
+      Highlight,
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+      }),
     ],
     content: "",
     onUpdate: ({ editor }) => {
@@ -119,98 +130,160 @@ const NewPost = () => {
   const markdownPreview = turndownService.turndown(content);
 
   return (
-    <form>
-      <h2>Create New Post</h2>
-
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Title"
-        required
-      />
-
-      <div style={{ marginTop: "1rem" }}>
-        <div>
-          <button type="button" onClick={() => editor?.commands.toggleBold()}>
-            Bold
-          </button>
-          <button type="button" onClick={() => editor?.commands.toggleItalic()}>
-            Italic
-          </button>
-          <button
-            type="button"
-            onClick={() => editor?.commands.toggleUnderline()}
-          >
-            Underline
-          </button>
+    <div className="newpost-container">
+      <div className="header-bar">
+        <div className="header-left">
+          <h2>Create A New Post</h2>
         </div>
 
-        <div
-          style={{
-            border: "1px solid #ccc",
-            padding: "1rem",
-            marginTop: "1rem",
-          }}
-        >
-          {editor && <EditorContent editor={editor} />}
-        </div>
+        <div className="header-right">
+          <Link to="/admin/dashboard">Dashboard</Link>
+          <Link to="/">Blog</Link>
 
-        <div style={{ marginTop: "1rem" }}>
-          <strong>Character Count: </strong>
-          {editor ? editor.storage.characterCount.characters() : 0} / 5000
-        </div>
-      </div>
-
-      <div style={{ marginTop: "1rem" }}>
-        <h4>Markdown Preview</h4>
-        <pre>{markdownPreview}</pre>
-      </div>
-
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setImage(e.target.files[0])}
-      />
-
-      <div>
-        <h4>Tags:</h4>
-        {availableTags.map((tag) => (
-          <label key={tag.id} style={{ marginRight: "10px" }}>
+          <label className="switch">
             <input
               type="checkbox"
-              checked={selectedTags.includes(tag.name)}
-              onChange={() => handleTagToggle(tag.name)}
+              checked={darkMode}
+              onChange={() => setDarkMode(!darkMode)}
             />
-            {tag.name}
+            <span className="slider" />
           </label>
-        ))}
-        <div style={{ marginTop: "1rem" }}>
-          <input
-            type="text"
-            value={newTag}
-            placeholder="New tag name"
-            onChange={(e) => setNewTag(e.target.value)}
-          />
-          <button type="button" onClick={handleCreateTag}>
-            Add Tag
-          </button>
         </div>
       </div>
 
-      <div style={{ marginTop: "1rem" }}>
-        <button
-          type="button"
-          onClick={(e) => handleSubmit(e, "publish")}
-          style={{ marginRight: "10px" }}
-        >
-          Publish
-        </button>
+      <form>
+        <div className="editor-toolbar">
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Title"
+            required
+          />
 
-        <button type="button" onClick={(e) => handleSubmit(e, "draft")}>
-          Save as Draft
-        </button>
-      </div>
-    </form>
+          <div className="toolbar-group">
+            <button
+              type="button"
+              onClick={() => editor?.chain().focus().toggleBold().run()}
+              className={editor?.isActive("bold") ? "active" : ""}
+              title="Bold"
+            >
+              <strong>B</strong>
+            </button>
+            <button
+              type="button"
+              onClick={() => editor?.chain().focus().toggleItalic().run()}
+              className={editor?.isActive("italic") ? "active" : ""}
+              title="Italic"
+            >
+              <em>I</em>
+            </button>
+            <button
+              type="button"
+              onClick={() => editor?.chain().focus().toggleUnderline().run()}
+              className={editor?.isActive("underline") ? "active" : ""}
+              title="Underline"
+            >
+              <u>U</u>
+            </button>
+          </div>
+          <div className="toolbar-group">
+            <button onClick={() => editor?.commands.undo()} title="Undo">
+              ↺
+            </button>
+            <button onClick={() => editor?.commands.redo()} title="Redo">
+              ↻
+            </button>
+          </div>
+
+          <div className="toolbar-group color-picker">
+            <label className="color-picker-label" title="Text Color">
+              🎨
+              <input
+                type="color"
+                onChange={(e) => editor?.commands.setColor(e.target.value)}
+                aria-label="Choose text color"
+              />
+            </label>
+          </div>
+          <div
+            style={{
+              minHeight: "300px",
+            }}
+          >
+            <div className="editor-box">
+              {editor && <EditorContent editor={editor} />}
+            </div>
+          </div>
+
+          <div style={{ marginTop: "1rem" }}>
+            <strong>Character Count: </strong>
+            {editor ? editor.storage.characterCount.characters() : 0} / 5000
+          </div>
+        </div>
+
+        <div style={{ marginTop: "1rem" }}>
+          <h4>Markdown Preview</h4>
+          <div className="markdown-preview">
+            <ReactMarkdown>{markdownPreview}</ReactMarkdown>
+          </div>
+        </div>
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImage(e.target.files[0])}
+        />
+
+        <div>
+          <h4>Tags:</h4>
+          {availableTags.map((tag) => (
+            <label key={tag.id} style={{ marginRight: "10px" }}>
+              <input
+                type="checkbox"
+                checked={selectedTags.includes(tag.name)}
+                onChange={() => handleTagToggle(tag.name)}
+              />
+              {tag.name}
+            </label>
+          ))}
+          <div style={{ marginTop: "1rem" }}>
+            <input
+              type="text"
+              value={newTag}
+              placeholder="New tag name"
+              onChange={(e) => setNewTag(e.target.value)}
+            />
+            <button
+              type="button"
+              className="add-tag-button"
+              onClick={handleCreateTag}
+            >
+              Add Tag
+            </button>
+          </div>
+        </div>
+
+        <div style={{ marginTop: "1rem" }}>
+          <div className="submit-buttons">
+            <button
+              type="button"
+              className="createPost-submit"
+              onClick={(e) => handleSubmit(e, "publish")}
+            >
+              Publish
+            </button>
+
+            <button
+              type="button"
+              className="createPost-submit"
+              onClick={(e) => handleSubmit(e, "draft")}
+            >
+              Save as Draft
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 };
 

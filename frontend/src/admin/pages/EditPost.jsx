@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { getPostById, updatePost, getTags } from "../../utils/api";
+import "../components/NewPost.css";
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -9,6 +10,7 @@ import { Italic } from "@tiptap/extension-italic";
 import { Underline } from "@tiptap/extension-underline";
 import Placeholder from "@tiptap/extension-placeholder";
 import CharacterCount from "@tiptap/extension-character-count";
+import ReactMarkdown from "react-markdown";
 
 import TurndownService from "turndown";
 
@@ -22,6 +24,7 @@ const EditPost = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [published, setPublished] = useState(false);
   const [error, setError] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
 
   const [initialContent, setInitialContent] = useState("");
 
@@ -110,89 +113,137 @@ const EditPost = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Edit Post</h2>
+    <div className="newpost-container">
+      <div className="header-bar">
+        <div className="header-left">
+          <h2>Edit Post</h2>
+        </div>
 
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Title"
-        required
-      />
+        <div className="header-right">
+          <Link to="/admin/dashboard">Dashboard</Link>
+          <Link to="/">Blog</Link>
 
-      <div>
-        <button type="button" onClick={() => editor?.commands.toggleBold()}>
-          Bold
-        </button>
-        <button type="button" onClick={() => editor?.commands.toggleItalic()}>
-          Italic
-        </button>
-        <button
-          type="button"
-          onClick={() => editor?.commands.toggleUnderline()}
-        >
-          Underline
-        </button>
-      </div>
-
-      <div
-        style={{
-          border: "1px solid #ccc",
-          padding: "1rem",
-          marginTop: "1rem",
-        }}
-      >
-        {editor && <EditorContent editor={editor} />}
-      </div>
-
-      <div style={{ marginTop: "1rem" }}>
-        <strong>Character Count: </strong>
-        {editor ? editor.storage.characterCount.characters() : 0} / 5000
-      </div>
-
-      <div style={{ marginTop: "1rem" }}>
-        <h4>Markdown Preview</h4>
-        <pre>{markdownPreview}</pre>
-      </div>
-
-      <label style={{ display: "block", marginTop: "1rem" }}>
-        Replace image (optional):
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImage(e.target.files[0])}
-        />
-      </label>
-
-      <div style={{ marginTop: "1rem" }}>
-        <h4>Tags:</h4>
-        {availableTags.map((tag) => (
-          <label key={tag.id} style={{ marginRight: "10px" }}>
+          <label className="switch">
             <input
               type="checkbox"
-              checked={selectedTags.includes(tag.name)}
-              onChange={() => handleTagToggle(tag.name)}
+              checked={darkMode}
+              onChange={() => setDarkMode(!darkMode)}
             />
-            {tag.name}
+            <span className="slider" />
           </label>
-        ))}
+        </div>
       </div>
 
-      <div style={{ marginTop: "1rem" }}>
-        <label>
+      <form onSubmit={handleSubmit}>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Title"
+          required
+        />
+
+        <div className="editor-toolbar">
+          <div className="toolbar-group">
+            <button
+              type="button"
+              onClick={() => editor?.chain().focus().toggleBold().run()}
+              className={editor?.isActive("bold") ? "active" : ""}
+              title="Bold"
+            >
+              <strong>B</strong>
+            </button>
+            <button
+              type="button"
+              onClick={() => editor?.chain().focus().toggleItalic().run()}
+              className={editor?.isActive("italic") ? "active" : ""}
+              title="Italic"
+            >
+              <em>I</em>
+            </button>
+            <button
+              type="button"
+              onClick={() => editor?.chain().focus().toggleUnderline().run()}
+              className={editor?.isActive("underline") ? "active" : ""}
+              title="Underline"
+            >
+              <u>U</u>
+            </button>
+          </div>
+          <div className="toolbar-group">
+            <button onClick={() => editor?.commands.undo()} title="Undo">
+              ↺
+            </button>
+            <button onClick={() => editor?.commands.redo()} title="Redo">
+              ↻
+            </button>
+          </div>
+
+          <div className="toolbar-group color-picker">
+            <label className="color-picker-label" title="Text Color">
+              🎨
+              <input
+                type="color"
+                onChange={(e) => editor?.commands.setColor(e.target.value)}
+                aria-label="Choose text color"
+              />
+            </label>
+          </div>
+
+          <div className="editor-box">
+            {editor && <EditorContent editor={editor} />}
+          </div>
+
+          <div style={{ marginTop: "1rem" }}>
+            <strong>Character Count: </strong>
+            {editor ? editor.storage.characterCount.characters() : 0} / 5000
+          </div>
+        </div>
+
+        <div className="markdown-preview">
+          <ReactMarkdown>{markdownPreview}</ReactMarkdown>
+        </div>
+
+        <label style={{ display: "block", marginTop: "1rem" }}>
+          Replace image (optional):
           <input
-            type="checkbox"
-            checked={published}
-            onChange={(e) => setPublished(e.target.checked)}
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files[0])}
           />
-          Published
         </label>
-      </div>
 
-      <button type="submit" style={{ marginTop: "1rem" }}>
-        Update Post
-      </button>
-    </form>
+        <div style={{ marginTop: "1rem" }}>
+          <h4>Tags:</h4>
+          {availableTags.map((tag) => (
+            <label key={tag.id} style={{ marginRight: "10px" }}>
+              <input
+                type="checkbox"
+                checked={selectedTags.includes(tag.name)}
+                onChange={() => handleTagToggle(tag.name)}
+              />
+              {tag.name}
+            </label>
+          ))}
+        </div>
+
+        <div style={{ marginTop: "1rem" }}>
+          <label>
+            <input
+              type="checkbox"
+              checked={published}
+              onChange={(e) => setPublished(e.target.checked)}
+            />
+            Published
+          </label>
+        </div>
+
+        <div className="submit-buttons">
+          <button type="submit" className="createPost-submit">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

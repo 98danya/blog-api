@@ -7,10 +7,13 @@ import {
   unpublishPost,
   getUserProfile,
 } from "../../utils/api";
+import "../components/Dashboard.css";
+import "../../client/components/Index.css";
 
 const Dashboard = () => {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -32,6 +35,10 @@ const Dashboard = () => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle("dark-mode", darkMode);
+  }, [darkMode]);
 
   const handleDelete = async (postId) => {
     const confirmDelete = window.confirm(
@@ -84,53 +91,109 @@ const Dashboard = () => {
   const draftPosts = posts.filter((post) => !post.published);
 
   return (
-    <div>
-      <h1>Admin Dashboard</h1>
+    <div className="dashboard-container">
+      <div className="header-bar">
+        <div className="header-left">
+          <h2>Your Dashboard</h2>
+        </div>
 
-      <Link to="/">
-        <button>Back to Blog</button>
-      </Link>
+        <div className="header-right">
+          <Link to="/">Back to Blog</Link>
+          <Link to="/admin/new-post">Create New Post</Link>
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={darkMode}
+              onChange={() => setDarkMode(!darkMode)}
+            />
+            <span className="slider" />
+          </label>
+        </div>
+      </div>
 
-      <Link to="/admin/new-post">
-        <button>Create New Post</button>
-      </Link>
-      <h2>Published Posts</h2>
-      {publishedPosts.length > 0 ? (
-        publishedPosts.map((post) => (
-          <div key={post.id}>
-            <Link to={`/posts/${post.id}`}>
-              <h3 style={{ cursor: "pointer", color: "blue" }}>{post.title}</h3>
-              <p>{post.excerpt || post.content.slice(0, 100)}...</p>
-            </Link>
-            <button onClick={() => handleDelete(post.id)}>Delete</button>
-            <button onClick={() => handleUnpublish(post.id)}>Unpublish</button>
-            <Link to={`/admin/edit-post/${post.id}`}>
-              <button>Edit</button>
-            </Link>
-          </div>
-        ))
-      ) : (
-        <p>No published posts yet.</p>
-      )}
+      <h2 className="section-title">Published Posts</h2>
+      <section className="post-section">
+        {publishedPosts.length > 0 ? (
+          publishedPosts.map((post) => (
+            <div key={post.id} className="post-card">
+              {post.imageUrl && (
+                <img
+                  src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                  alt="Post visual"
+                />
+              )}
+              <Link to={`/posts/${post.id}`} className="post-link">
+                <h3 className="post-title">{post.title}</h3>
+                <p className="post-excerpt">
+                  {post.excerpt || post.content.slice(0, 100)}...
+                </p>
+              </Link>
 
-      <h2>Drafts</h2>
-      {draftPosts.length > 0 ? (
-        draftPosts.map((post) => (
-          <div key={post.id}>
-            <Link to={`/posts/${post.id}`}>
-              <h3 style={{ cursor: "pointer", color: "blue" }}>{post.title}</h3>
-              <p>{post.excerpt || post.content.slice(0, 100)}...</p>
-            </Link>
-            <button onClick={() => handleDelete(post.id)}>Delete</button>
-            <button onClick={() => handlePublish(post.id)}>Publish</button>
-            <Link to={`/admin/edit-post/${post.id}`}>
-              <button>Edit</button>
-            </Link>
-          </div>
-        ))
-      ) : (
-        <p>No drafts found.</p>
-      )}
+              <div className="button-group">
+                <button
+                  className="delete-button"
+                  onClick={() => handleDelete(post.id)}
+                >
+                  Delete
+                </button>
+                <button
+                  className="unpublish-button"
+                  onClick={() => handleUnpublish(post.id)}
+                >
+                  Unpublish
+                </button>
+                <Link to={`/admin/edit-post/${post.id}`}>
+                  <button className="edit-button">Edit</button>
+                </Link>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="no-posts-message">No published posts yet.</p>
+        )}
+      </section>
+
+      <h2 className="section-title">Drafts</h2>
+      <section className="post-section">
+        {draftPosts.length > 0 ? (
+          draftPosts.map((post) => (
+            <div key={post.id} className="post-card">
+              {post.imageUrl && (
+                <img
+                  src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                  alt="Post visual"
+                />
+              )}
+              <Link to={`/posts/${post.id}`} className="post-link">
+                <h3 className="post-title">{post.title}</h3>
+                <p className="post-excerpt">
+                  {post.excerpt || post.content.slice(0, 100)}...
+                </p>
+              </Link>
+
+              <div className="button-group">
+                <button
+                  className="delete-button"
+                  onClick={() => handleDelete(post.id)}
+                >
+                  Delete
+                </button>
+                <button
+                  className="publish-button"
+                  onClick={() => handlePublish(post.id)}
+                >
+                  Publish
+                </button>
+                <Link to={`/admin/edit-post/${post.id}`}>
+                  <button className="read-button">Edit</button>
+                </Link>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="no-posts-message">No drafts found.</p>
+        )}
+      </section>
     </div>
   );
 };

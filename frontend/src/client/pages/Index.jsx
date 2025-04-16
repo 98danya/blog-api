@@ -251,10 +251,18 @@ const Index = () => {
                 addSuffix: true,
               })}
             </p>
-
-            <Link to={`/posts/${post.id}`} className="read-button">
+            <button
+              className="read-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                postRefs.current[post.id]?.scrollIntoView({
+                  behavior: "smooth",
+                });
+                history.pushState(null, "", `#${post.id}`);
+              }}
+            >
               Read
-            </Link>
+            </button>
           </div>
         ))}
       </div>

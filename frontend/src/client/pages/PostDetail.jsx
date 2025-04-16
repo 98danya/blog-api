@@ -241,7 +241,10 @@ const PostDetail = ({ embeddedPost }) => {
         </div>
       </div>
 
-      <p className="contentText">{post.content}</p>
+      <div
+        className="contentText"
+        dangerouslySetInnerHTML={{ __html: post.content }}
+      />
 
       <hr />
 
