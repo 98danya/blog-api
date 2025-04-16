@@ -13,6 +13,7 @@ import {
   getPostById,
 } from "../../utils/api";
 import { formatDistanceToNow } from "date-fns";
+import "../components/PostDetail.css";
 
 const PostDetail = ({ embeddedPost }) => {
   const { id: routeId } = useParams();
@@ -68,19 +69,23 @@ const PostDetail = ({ embeddedPost }) => {
 
   useEffect(() => {
     const updateCommentLikes = async () => {
-      if (!userId || comments.length === 0) return;
+      if (comments.length === 0) return;
 
       const updatedLiked = {};
       const updatedCounts = {};
 
       for (const comment of comments) {
         const likes = await getCommentLikes(comment.id);
-        updatedLiked[comment.id] = likes.some((like) => like.userId === userId);
         updatedCounts[comment.id] = likes.length;
+        if (userId) {
+          updatedLiked[comment.id] = likes.some(
+            (like) => like.userId === userId
+          );
+        }
       }
 
-      setLikedComments(updatedLiked);
       setCommentLikes(updatedCounts);
+      if (userId) setLikedComments(updatedLiked);
     };
 
     updateCommentLikes();
@@ -205,108 +210,143 @@ const PostDetail = ({ embeddedPost }) => {
   if (!post) return <p>Loading...</p>;
 
   return (
-    <div>
+    <div className="post-detail">
+      <h1>{post.title}</h1>
       {post.imageUrl && (
         <img
           src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
           alt="Post visual"
-          style={{ maxWidth: "40%", margin: "1rem 0" }}
+          style={{
+            maxWidth: "100%",
+            width: "100%",
+            height: "450px",
+            borderRadius: "12px",
+          }}
         />
       )}
-      <h1>{post.title}</h1>
-      <p>
-        By <strong>{post.author.username}</strong>
-      </p>
-      <p>
-        {formatDistanceToNow(new Date(post.publishedAt || post.createdAt), {
-          addSuffix: true,
-        })}
-      </p>
-      <p>{post.content}</p>
-
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <button onClick={toggleLike}>{liked ? "💔 Unlike" : "❤️ Like"}</button>
-        <span>{likeCount}</span>
+      <div className="post-meta">
+        <p className="post-date">
+          {formatDistanceToNow(new Date(post.publishedAt || post.createdAt), {
+            addSuffix: true,
+          })}
+        </p>
+        <div className="like-section">
+          <button
+            onClick={toggleLike}
+            className={`like-button heart ${liked ? "liked" : ""}`}
+          >
+            {liked ? "♥︎" : "♡"}
+          </button>
+          <span className="like-count">{likeCount}</span>
+        </div>
       </div>
 
-      <hr />
-      <h2>Comments</h2>
-      {comments.length === 0 ? (
-        <p>No comments yet. Be the first!</p>
-      ) : (
-        comments.map((comment) => (
-          <div key={comment.id}>
-            <strong>{comment.user?.username || "Anonymous"}:</strong>
-            <br />
-            <small>
-              {formatDistanceToNow(new Date(comment.createdAt), {
-                addSuffix: true,
-              })}
-            </small>
+      <p className="contentText">{post.content}</p>
 
-            {editingCommentId === comment.id ? (
-              <>
-                <textarea
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
-                />
-                <div>
-                  <button onClick={() => saveEditedComment(comment.id)}>
-                    Save
-                  </button>
-                  <button onClick={cancelEditing}>Cancel</button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p>{comment.content}</p>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <button onClick={() => likeCommentHandler(comment.id)}>
-                    {likedComments[comment.id] ? "💔 Unlike" : "❤️ Like"}
-                  </button>
-                  <span>{commentLikes[comment.id] || 0}</span>
-                </div>
-                {(userId === comment.userId ||
-                  (isAdmin && userId === post.authorId)) && (
-                  <div>
-                    <button onClick={() => handleDeleteComment(comment.id)}>
-                      Delete
+      <hr />
+
+      <div className="comments-section">
+        {!token && (
+          <div className="comment-login-prompt">
+            <p>
+              <a href="/login">Login</a> or <a href="/signup">Register</a> to
+              leave a comment.
+            </p>
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Write your comment..."
+              required
+            />
+          </div>
+        )}
+
+        <div className="comment-create">
+          {token && (
+            <form onSubmit={handleCommentSubmit}>
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Write your comment..."
+                required
+              />
+              <br />
+              <button type="submit">Post Comment</button>
+            </form>
+          )}
+        </div>
+        <h2>Comments</h2>
+
+        {comments.length === 0 ? (
+          <p className="no-comments-message">No comments yet. Be the first!</p>
+        ) : (
+          comments.map((comment) => (
+            <div key={comment.id} className="comment-box">
+              <div className="comment-header">
+                <strong className="comment-username">
+                  {comment.user?.username || "Anonymous"}
+                </strong>
+                <small className="comment-time">
+                  {formatDistanceToNow(new Date(comment.createdAt), {
+                    addSuffix: true,
+                  })}
+                </small>
+              </div>
+
+              {editingCommentId === comment.id ? (
+                <>
+                  <textarea
+                    className="comment-edit-textarea"
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                  />
+                  <div className="comment-actions">
+                    <button onClick={() => saveEditedComment(comment.id)}>
+                      Save
                     </button>
-                    {userId === comment.userId && (
-                      <button
-                        onClick={() =>
-                          startEditingComment(comment.id, comment.content)
-                        }
-                      >
-                        Edit
-                      </button>
+                    <button onClick={cancelEditing}>Cancel</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="comment-content">{comment.content}</p>
+                  <div className="comment-actions">
+                    <button
+                      onClick={() => likeCommentHandler(comment.id)}
+                      className={`like-button heart ${
+                        likedComments[comment.id] ? "liked" : ""
+                      }`}
+                    >
+                      {likedComments[comment.id] ? "♥︎" : "♡"}
+                    </button>
+                    <span className="like-count">
+                      {commentLikes[comment.id]}
+                    </span>
+
+                    {(userId === comment.userId ||
+                      (isAdmin && userId === post.authorId)) && (
+                      <>
+                        <button onClick={() => handleDeleteComment(comment.id)}>
+                          Delete
+                        </button>
+                        {userId === comment.userId && (
+                          <button
+                            onClick={() =>
+                              startEditingComment(comment.id, comment.content)
+                            }
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
-                )}
-              </>
-            )}
-          </div>
-        ))
-      )}
-
-      {token && (
-        <form onSubmit={handleCommentSubmit}>
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write your comment..."
-            required
-          />
-          <br />
-          <button type="submit">Post Comment</button>
-        </form>
-      )}
+                </>
+              )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };

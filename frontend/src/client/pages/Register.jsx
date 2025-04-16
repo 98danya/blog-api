@@ -1,21 +1,30 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { registerUser, loginUser } from "../../utils/api";
+import { registerUser, loginUser, getUserProfile } from "../../utils/api";
+import "../components/Register.css";
 
-const Register = () => {
+const Register = ({ onSuccess }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     try {
       await registerUser(email, username, password);
       const data = await loginUser(email, password);
       localStorage.setItem("token", data.token);
-      navigate("/");
+
+      const profile = await getUserProfile(data.token);
+
+      if (onSuccess) onSuccess(profile);
     } catch (err) {
       setError("Registration failed. Please try again.");
       console.error(err);
@@ -23,7 +32,7 @@ const Register = () => {
   };
 
   return (
-    <div>
+    <div className="register-container">
       <h2>Register</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleRegister}>
@@ -46,6 +55,13 @@ const Register = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
+          required
+        />
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Confirm Password"
           required
         />
         <button type="submit">Register</button>

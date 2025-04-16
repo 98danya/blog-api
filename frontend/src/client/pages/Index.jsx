@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import {
-  logoutUser,
-  getPosts,
-  getTags,
-  getUserProfile,
-} from "../../utils/api";
+import { logoutUser, getPosts, getTags, getUserProfile } from "../../utils/api";
+import { formatDistanceToNow } from "date-fns";
 import PostDetail from "./PostDetail";
+import Login from "./Login";
+import Register from "./Register";
+import "../components/Index.css";
+import { Github, Linkedin, Mail } from "lucide-react";
 
 const Index = () => {
   const [posts, setPosts] = useState([]);
@@ -15,9 +15,18 @@ const Index = () => {
   const [selectedTag, setSelectedTag] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const postRefs = useRef({});
+  const topRef = useRef(null);
+  const [visibleForm, setVisibleForm] = useState(null);
+  const formSectionRef = useRef(null);
+  const footerRef = useRef(null);
+
+  const tagNames = ["All", ...tags.map((tag) => tag.name)];
+  const activeIndex = tagNames.findIndex((tag) => tag === selectedTag);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,8 +47,9 @@ const Index = () => {
 
     const token = localStorage.getItem("token");
     if (token) {
-      setLoggedIn(true);
       getUserProfile(token).then((profile) => {
+        setUser(profile);
+        setLoggedIn(true);
         setIsAdmin(profile.isAdmin);
       });
     }
@@ -51,6 +61,10 @@ const Index = () => {
       postRefs.current[hash].scrollIntoView({ behavior: "smooth" });
     }
   }, [location.hash]);
+
+  useEffect(() => {
+    document.body.classList.toggle("dark-mode", darkMode);
+  }, [darkMode]);
 
   const handleLogout = () => {
     logoutUser();
@@ -92,70 +106,208 @@ const Index = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [filteredPosts]);
 
+  useEffect(() => {
+    if (!footerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          setVisibleForm(null);
+        }
+      },
+      {
+        root: null,
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(footerRef.current);
+
+    return () => {
+      if (footerRef.current) observer.unobserve(footerRef.current);
+    };
+  }, []);
+
   return (
-    <div>
-      <h1>Latest Posts</h1>
-
-      {loggedIn ? (
-        <>
-          <button onClick={handleLogout}>Logout</button>
-          <h2>Welcome, you are logged in!</h2>
-        </>
-      ) : (
-        <div>
-          <Link to="/login"><button>Login</button></Link>
-          <Link to="/register"><button>Register</button></Link>
+    <div className="index-container">
+      <div ref={topRef}></div>
+      <div className="header-bar">
+        <div className="header-left">
+          {loggedIn && <span>Welcome{user ? `, ${user.username}` : ""}.</span>}
         </div>
-      )}
 
-      {isAdmin && (
-        <Link to="/admin/dashboard"><button>Dashboard</button></Link>
-      )}
-
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Search posts..."
-      />
-
-      <div>
-        <button onClick={() => setSelectedTag("All")}>All</button>
-        {tags.map((tag) => (
-          <button key={tag.id} onClick={() => setSelectedTag(tag.name)}>
-            {tag.name}
-          </button>
-        ))}
+        <div className="header-right">
+          {loggedIn ? (
+            <>
+              {isAdmin && <Link to="/admin/dashboard">Dashboard</Link>}
+              <Link onClick={handleLogout}>Logout</Link>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => {
+                  setVisibleForm("login");
+                  setTimeout(() => {
+                    formSectionRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                    });
+                  }, 100);
+                }}
+              >
+                Login
+              </button>
+              <button
+                onClick={() => {
+                  setVisibleForm("register");
+                  setTimeout(() => {
+                    formSectionRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                    });
+                  }, 100);
+                }}
+              >
+                Register
+              </button>
+            </>
+          )}
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={darkMode}
+              onChange={() => setDarkMode(!darkMode)}
+            />
+            <span className="slider" />
+          </label>
+        </div>
       </div>
 
-      <div>
+      <h1 className="main-title">Danya’s Digital Diary</h1>
+
+      <div className="main-placeholder">
+        <p>This is a placeholder section. Will be replaced later on.</p>
+      </div>
+
+      <div className="search-bar">
+        <div className="search-input-wrapper">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search posts..."
+          />
+          {searchTerm && (
+            <button className="clear-button" onClick={() => setSearchTerm("")}>
+              ×
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="tag-bar-wrapper">
+        <div
+          className="tag-bar"
+          style={{
+            "--tag-count": tagNames.length,
+            "--active-index": activeIndex,
+          }}
+        >
+          {tagNames.map((tagName) => (
+            <button
+              key={tagName}
+              className={`tag-button ${
+                selectedTag === tagName ? "active" : ""
+              }`}
+              onClick={() => setSelectedTag(tagName)}
+            >
+              {tagName}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="post-card-wrapper">
         {filteredPosts.map((post) => (
           <div
             key={post.id}
             className="post-card"
-            style={{ cursor: "pointer" }}
+            ref={(el) => (postRefs.current[post.id] = el)}
             onClick={() => {
-              const targetRef = postRefs.current[post.id];
-              if (targetRef) {
-                targetRef.scrollIntoView({ behavior: "smooth" });
-                history.pushState(null, "", `#${post.id}`);
-              }
+              postRefs.current[post.id]?.scrollIntoView({ behavior: "smooth" });
+              history.pushState(null, "", `#${post.id}`);
             }}
           >
             {post.imageUrl && (
               <img
                 src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
                 alt="Post visual"
-                style={{ maxWidth: "10%", margin: "1rem 0" }}
               />
             )}
             <h2>{post.title}</h2>
             <p>{post.excerpt || post.content.slice(0, 100)}...</p>
+
+            <p className="post-time">
+              {formatDistanceToNow(new Date(post.createdAt), {
+                addSuffix: true,
+              })}
+            </p>
+
+            <Link to={`/posts/${post.id}`} className="read-button">
+              Read
+            </Link>
           </div>
         ))}
       </div>
+      {!loggedIn && visibleForm && (
+        <div className="auth-wrapper" ref={formSectionRef}>
+          {visibleForm === "login" && (
+            <div className="auth-form">
+              <Login
+                onSuccess={(userData) => {
+                  setLoggedIn(true);
+                  setUser(userData);
+                  setIsAdmin(userData.isAdmin);
+                  setVisibleForm(null);
+                  topRef.current?.scrollIntoView({ behavior: "smooth" });
+                }}
+              />
+            </div>
+          )}
+          {visibleForm === "register" && (
+            <div className="auth-form">
+              <Register
+                onSuccess={(userData) => {
+                  setLoggedIn(true);
+                  setUser(userData);
+                  setIsAdmin(userData.isAdmin);
+                  setVisibleForm(null);
+                  topRef.current?.scrollIntoView({ behavior: "smooth" });
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
-      <hr />
+      <div className="social-icons">
+        <a
+          href="https://github.com/98danya"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Github />
+        </a>
+        <a
+          href="https://www.linkedin.com/in/danya-mohammed/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Linkedin />
+        </a>
+        <a href="mailto:1998.danyamohammed@gmail.com">
+          <Mail />
+        </a>
+      </div>
 
       <div>
         {filteredPosts.map((post) => (
@@ -163,13 +315,21 @@ const Index = () => {
             key={post.id}
             ref={(el) => (postRefs.current[post.id] = el)}
             id={post.id}
-            style={{ paddingTop: "3rem", scrollMarginTop: "3rem" }}
+            style={{ scrollMarginTop: "3rem" }}
           >
             <PostDetail embeddedPost={post} />
-            <hr />
           </div>
         ))}
       </div>
+
+      <footer className="footer" ref={footerRef}>
+        <button
+          className="scroll-to-top"
+          onClick={() => topRef.current?.scrollIntoView({ behavior: "smooth" })}
+        >
+          ⬆ Return to the beginning
+        </button>
+      </footer>
     </div>
   );
 };

@@ -1,27 +1,29 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../utils/api";
+import { loginUser, getUserProfile } from "../../utils/api";
+import "../components/Login.css";
 
-const Login = () => {
+const Login = ({ onSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const data = await loginUser(email, password);
-      localStorage.setItem("token", data.token);
-      navigate("/");
-    } catch (err) {
-      setError("Login failed. Please try again.");
-      console.error(err);
-    }
-  };
+const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const data = await loginUser(email, password);
+    localStorage.setItem("token", data.token);
+
+    const profile = await getUserProfile(data.token);
+
+    if (onSuccess) onSuccess(profile);
+  } catch (err) {
+    setError("Login failed. Please try again.");
+    console.error(err);
+  }
+};
 
   return (
-    <div>
+    <div className="login-container">
       <h2>Login</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleLogin}>
