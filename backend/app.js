@@ -15,7 +15,7 @@ app.use("/uploads", express.static("uploads"));
 
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173", "https://danya-digital-diary.netlify.app"],
   credentials: true
 }));
 

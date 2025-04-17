@@ -1,21 +1,21 @@
 @font-face {
   font-family: "Roboto Mono", monospace;
-  src: url(/frontend/public/fonts/RobotoMono-VariableFont_wght.ttf);
+  src: url(/fonts/RobotoMono-VariableFont_wght.ttf);
 }
 
 @font-face {
   font-family: "League Spartan";
-  src: url(/frontend/public/fonts/LeagueSpartan-Bold.otf);
+  src: url(/fonts/LeagueSpartan-Bold.otf);
 }
 
 @font-face {
   font-family: "Roboto";
-  src: url(/frontend/public/fonts/Roboto-VariableFont_wdth\,wght.ttf);
+  src: url(/fonts/Roboto-VariableFont_wdth\,wght.ttf);
 }
 
 @font-face {
   font-family: "DotGothic16";
-  src: url(/frontend/public/fonts/DotGothic16-Regular.ttf);
+  src: url(/fonts/DotGothic16-Regular.ttf);
 }
 
 .index-container {
