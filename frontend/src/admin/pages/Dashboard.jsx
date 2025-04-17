@@ -94,8 +94,8 @@ const Dashboard = () => {
         </div>
 
         <div className="header-right">
-          <Link to="/">Back to Blog</Link>
           <Link to="/admin/new-post">Create New Post</Link>
+          <Link to="/">Blog</Link>
         </div>
       </div>
 
