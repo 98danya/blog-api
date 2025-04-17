@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { useParams, useLocation, Link, useNavigate } from "react-router-dom";
 import {
   getComments,
   addComment,
@@ -11,11 +11,15 @@ import {
   unlikeComment,
   getCommentLikes,
   getPostById,
+  logoutUser,
 } from "../../utils/api";
 import { formatDistanceToNow } from "date-fns";
 import "../components/PostDetail.css";
 
 const PostDetail = ({ embeddedPost }) => {
+  const location = useLocation();
+  const fromAdmin = location.state?.fromAdmin || false;
+  const topRef = useRef(null);
   const { id: routeId } = useParams();
   const postId = embeddedPost?.id || routeId;
   const [post, setPost] = useState(embeddedPost || null);
@@ -29,8 +33,36 @@ const PostDetail = ({ embeddedPost }) => {
   const [likedComments, setLikedComments] = useState({});
   const [commentLikes, setCommentLikes] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      getUserProfile(token)
+        .then((profile) => {
+          setUser(profile);
+          setLoggedIn(true);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch user profile:", err);
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle("dark-mode", darkMode);
+  }, [darkMode]);
+
+  const handleLogout = () => {
+    logoutUser();
+    setLoggedIn(false);
+    navigate("/");
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -210,8 +242,44 @@ const PostDetail = ({ embeddedPost }) => {
   if (!post) return <p>Loading...</p>;
 
   return (
-    <div className="post-detail">
-      <h1>{post.title}</h1>
+    <div className="postdetail-container">
+      {fromAdmin && (
+        <>
+          <div ref={topRef}></div>
+          <div className="header-bar">
+            <div className="header-left">
+              {loggedIn && (
+                <span>Welcome{user ? `, ${user.username}` : ""}.</span>
+              )}
+            </div>
+
+            <div className="header-right">
+              {loggedIn ? (
+                <>
+                  {isAdmin && <Link to="/admin/dashboard">Dashboard</Link>}
+                  <Link onClick={handleLogout}>Logout</Link>
+                </>
+              ) : null}
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={darkMode}
+                  onChange={() => setDarkMode(!darkMode)}
+                />
+                <span className="slider" />
+              </label>
+            </div>
+          </div>
+
+          <h1 className="main-title">
+            <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+              Danya’s Digital Diary
+            </Link>
+          </h1>
+        </>
+      )}
+
+      <h1 className="post-header">{post.title}</h1>
       {post.imageUrl && (
         <img
           src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
@@ -226,7 +294,7 @@ const PostDetail = ({ embeddedPost }) => {
       )}
       <div className="post-meta">
         <p className="post-date">
-          {formatDistanceToNow(new Date(post.publishedAt || post.createdAt), {
+          {formatDistanceToNow(new Date(post.createdAt), {
             addSuffix: true,
           })}
         </p>
@@ -287,7 +355,7 @@ const PostDetail = ({ embeddedPost }) => {
             <div key={comment.id} className="comment-box">
               <div className="comment-header">
                 <strong className="comment-username">
-                  {comment.user?.username || "Anonymous"}
+                  @{comment.user?.username || "Anonymous"}
                 </strong>
                 <small className="comment-time">
                   {formatDistanceToNow(new Date(comment.createdAt), {

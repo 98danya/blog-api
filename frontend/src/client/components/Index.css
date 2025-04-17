@@ -265,7 +265,7 @@
 .post-card p {
   font-size: 0.95rem;
   color: #444;
-  font-family: "DotGothic16";
+  font-family: Helvetica, sans-serif !important;
 }
 
 .post-time {
@@ -293,8 +293,6 @@
   color: #ffffff;
   transition: background-color 0.3s;
 }
-
-
 
 .social-icons {
   display: flex;

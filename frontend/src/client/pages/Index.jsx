@@ -248,7 +248,12 @@ const Index = () => {
               />
             )}
             <h2>{post.title}</h2>
-            <p>{post.excerpt || post.content.slice(0, 100)}...</p>
+            <div
+              className="post-preview"
+              dangerouslySetInnerHTML={{
+                __html: (post.excerpt || post.content.slice(0, 100)) + "...",
+              }}
+            />
 
             <p className="post-time">
               {formatDistanceToNow(new Date(post.createdAt), {

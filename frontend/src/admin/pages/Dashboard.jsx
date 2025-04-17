@@ -7,6 +7,7 @@ import {
   unpublishPost,
   getUserProfile,
 } from "../../utils/api";
+import { formatDistanceToNow } from "date-fns";
 import "../components/Dashboard.css";
 import "../../client/components/Index.css";
 
@@ -116,18 +117,32 @@ const Dashboard = () => {
         {publishedPosts.length > 0 ? (
           publishedPosts.map((post) => (
             <div key={post.id} className="post-card">
-              {post.imageUrl && (
-                <img
-                  src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
-                  alt="Post visual"
-                />
-              )}
-              <Link to={`/posts/${post.id}`} className="post-link">
+              <Link
+                to={`/posts/${post.id}`}
+                state={{ fromAdmin: true }}
+                className="post-link"
+              >
+                {post.imageUrl && (
+                  <img
+                    src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                    alt="Post visual"
+                  />
+                )}
                 <h3 className="post-title">{post.title}</h3>
-                <p className="post-excerpt">
-                  {post.excerpt || post.content.slice(0, 100)}...
-                </p>
+                <div
+                  className="post-preview"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      (post.excerpt || post.content.slice(0, 100)) + "...",
+                  }}
+                />
               </Link>
+
+              <p className="post-time">
+                {formatDistanceToNow(new Date(post.createdAt), {
+                  addSuffix: true,
+                })}
+              </p>
 
               <div className="button-group">
                 <button
@@ -158,17 +173,25 @@ const Dashboard = () => {
         {draftPosts.length > 0 ? (
           draftPosts.map((post) => (
             <div key={post.id} className="post-card">
-              {post.imageUrl && (
-                <img
-                  src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
-                  alt="Post visual"
-                />
-              )}
-              <Link to={`/posts/${post.id}`} className="post-link">
+              <Link
+                to={`/posts/${post.id}`}
+                state={{ fromAdmin: true }}
+                className="post-link"
+              >
+                {post.imageUrl && (
+                  <img
+                    src={`${import.meta.env.VITE_API_URL}${post.imageUrl}`}
+                    alt="Post visual"
+                  />
+                )}
                 <h3 className="post-title">{post.title}</h3>
-                <p className="post-excerpt">
-                  {post.excerpt || post.content.slice(0, 100)}...
-                </p>
+                <div
+                  className="post-preview"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      (post.excerpt || post.content.slice(0, 100)) + "...",
+                  }}
+                />
               </Link>
 
               <div className="button-group">
