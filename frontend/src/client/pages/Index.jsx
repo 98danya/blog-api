@@ -16,7 +16,6 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const postRefs = useRef({});
@@ -62,10 +61,6 @@ const Index = () => {
       postRefs.current[hash].scrollIntoView({ behavior: "smooth" });
     }
   }, [location.hash]);
-
-  useEffect(() => {
-    document.body.classList.toggle("dark-mode", darkMode);
-  }, [darkMode]);
 
   const handleLogout = () => {
     logoutUser();
@@ -172,14 +167,6 @@ const Index = () => {
               </button>
             </>
           )}
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={darkMode}
-              onChange={() => setDarkMode(!darkMode)}
-            />
-            <span className="slider" />
-          </label>
         </div>
       </div>
 

@@ -26,7 +26,6 @@ const NewPost = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [newTag, setNewTag] = useState("");
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -139,15 +138,6 @@ const NewPost = () => {
         <div className="header-right">
           <Link to="/admin/dashboard">Dashboard</Link>
           <Link to="/">Blog</Link>
-
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={darkMode}
-              onChange={() => setDarkMode(!darkMode)}
-            />
-            <span className="slider" />
-          </label>
         </div>
       </div>
 

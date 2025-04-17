@@ -14,7 +14,6 @@ import "../../client/components/Index.css";
 const Dashboard = () => {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -36,10 +35,6 @@ const Dashboard = () => {
 
     fetchData();
   }, []);
-
-  useEffect(() => {
-    document.body.classList.toggle("dark-mode", darkMode);
-  }, [darkMode]);
 
   const handleDelete = async (postId) => {
     const confirmDelete = window.confirm(
@@ -101,14 +96,6 @@ const Dashboard = () => {
         <div className="header-right">
           <Link to="/">Back to Blog</Link>
           <Link to="/admin/new-post">Create New Post</Link>
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={darkMode}
-              onChange={() => setDarkMode(!darkMode)}
-            />
-            <span className="slider" />
-          </label>
         </div>
       </div>
 

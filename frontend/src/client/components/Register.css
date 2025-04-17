@@ -1,6 +1,6 @@
 .register-container {
     max-width: 400px;
-    margin: 4rem auto;
+    margin: 2rem auto;
     padding: 2rem;
     background-color: #ffffff;
     border-radius: 1rem;
@@ -19,20 +19,26 @@
     flex-direction: column;
     gap: 1rem;
 }
-
 .register-container input {
     padding: 0.75rem 1rem;
     font-size: 1rem;
     border-radius: 0.5rem;
     border: 1px solid #ccc;
     font-family: "Roboto Mono", monospace;
-}
 
-.register-container input:focus {
+  }
+  
+  .register-container input[type="text"],
+  .register-container input[type="email"],
+  .register-container input[type="password"] {
+    border-radius: 0.5rem;
+    width: 15rem;
+}
+  
+  .register-container input:focus {
     outline: none;
     border: 2px solid #000;
-}
-
+  }
 .register-container button {
     background-color: #f2f2f2;
     color: #000;
@@ -53,8 +59,43 @@
     transition: background-color 0.3s;
 }
 
-.register-container p {
-    color: red;
-    text-align: center;
-    font-family: "Roboto Mono", monospace;
+/* Dark Mode */
+
+body.dark-mode {
+    background-color: #121212;
+    color: #f5f5f5;
+  }
+  
+.dark-mode .register-container {
+    background-color: #121212;
+    color: #f5f5f5;
+  }
+  
+  .dark-mode .register-container form {
+background-color: #121212;
 }
+
+.dark-mode .register-container h2 {
+    color: #f5f5f5;
+  }
+  
+.dark-mode .register-container input {
+    background-color: #121212;
+    color: #f5f5f5;
+    border: 1px solid #444;
+  }
+  
+  .dark-mode .register-container input:focus {
+    border: 2px solid #bbb;
+  }
+  
+  .dark-mode .register-container button {
+    background-color: #333;
+    color: #f5f5f5;
+  }
+  
+  .dark-mode .register-container button:hover {
+    background-color: #f5f5f5;
+    color: #000;
+  }
+  

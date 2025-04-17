@@ -35,7 +35,6 @@ const PostDetail = ({ embeddedPost }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
@@ -53,10 +52,6 @@ const PostDetail = ({ embeddedPost }) => {
         });
     }
   }, []);
-
-  useEffect(() => {
-    document.body.classList.toggle("dark-mode", darkMode);
-  }, [darkMode]);
 
   const handleLogout = () => {
     logoutUser();
@@ -260,14 +255,6 @@ const PostDetail = ({ embeddedPost }) => {
                   <Link onClick={handleLogout}>Logout</Link>
                 </>
               ) : null}
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={darkMode}
-                  onChange={() => setDarkMode(!darkMode)}
-                />
-                <span className="slider" />
-              </label>
             </div>
           </div>
 

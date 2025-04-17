@@ -24,7 +24,6 @@ const EditPost = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [published, setPublished] = useState(false);
   const [error, setError] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
 
   const [initialContent, setInitialContent] = useState("");
 
@@ -122,15 +121,6 @@ const EditPost = () => {
         <div className="header-right">
           <Link to="/admin/dashboard">Dashboard</Link>
           <Link to="/">Blog</Link>
-
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={darkMode}
-              onChange={() => setDarkMode(!darkMode)}
-            />
-            <span className="slider" />
-          </label>
         </div>
       </div>
 

@@ -31,7 +31,7 @@
   justify-content: space-between;
   align-items: center;
   font-family: "Roboto Mono", monospace;
-  margin-bottom: 0;  
+  margin-bottom: 0;
 }
 
 .header-right {
@@ -218,7 +218,7 @@ hr {
 
 .comment-login-prompt textarea,
 form textarea {
-  width: 100%;
+  width: 97%;
   height: 100px;
   padding: 1rem;
   border-radius: 12px;
@@ -238,6 +238,7 @@ form textarea {
 }
 
 .comment-box {
+  width: 90%;
   background-color: #ffffff;
   padding: 1rem;
   margin-top: 1rem;
@@ -322,4 +323,66 @@ form textarea {
   flex: 1;
   min-width: 300px;
   max-width: 400px;
+}
+
+/* Dark Mode */
+
+.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+.dark-mode .postdetail-container {
+  background-color: #121212;
+}
+
+.dark-mode .header-bar,
+.dark-mode .header-bar a,
+.dark-mode .header-bar span,
+.dark-mode .header-bar button {
+  color: #ffffff;
+}
+
+.dark-mode .contentText {
+  color: #e0e0e0;
+}
+
+.dark-mode .like-button.heart {
+  color: #e63946;
+}
+
+.dark-mode .like-button.heart.liked {
+  color: #e63946;
+}
+
+.dark-mode .comments-section {
+  background-color: #121212;
+}
+
+.dark-mode .comment-login-prompt p,
+.dark-mode .comment-login-prompt a {
+  color: #ffffff;
+}
+
+.dark-mode .comment-box {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+.dark-mode .comment-header .comment-username {
+  color: #ffffff;
+}
+
+.dark-mode .comment-header .comment-time {
+  color: #aaa;
+}
+
+.dark-mode .comment-actions button,
+.dark-mode .comment-create button {
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+.dark-mode .comment-actions button:hover {
+  background-color: #444;
 }
