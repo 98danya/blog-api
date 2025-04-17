@@ -1,243 +1,283 @@
 .newpost-container {
-    max-width: 1000px;
-    margin: 2rem auto;
-    padding: 1rem;
-    background-color: #ffffff;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background-color: #ffffff;
 }
 
 form {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background-color: #fff;
-    font-family: "Roboto", sans-serif;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  font-family: "Roboto", sans-serif;
 }
-
 
 input[type="text"],
 input[placeholder="Title"] {
-    width: 96%;
-    padding: 0.75rem 1rem;
-    margin-top: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 999px;
-    font-size: 1rem;
+  width: 96%;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  font-size: 1rem;
 }
 
-input[type="file"]{
-    padding: 0.75rem 1rem;
-    margin-top: 1rem;
-    border: none;
-    font-size: 1rem;
+input[type="file"] {
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  border: none;
+  font-size: 1rem;
 }
 
 input[type="text"]:focus,
 input[placeholder="Title"]:focus {
-    outline: none;
-    border-color: #000;
+  outline: none;
+  border-color: #000;
 }
 
 button {
-    background-color: #f2f2f2;
-    border: none;
-    padding: 0.5rem 1.5rem;
-    border-radius: 999px;
-    font-size: 0.95rem;
-    margin-right: 0.5rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  background-color: #f2f2f2;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  margin-right: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #000;
-    color: #fff;
+  background-color: #000;
+  color: #fff;
 }
 
 .editor-container {
-    border: 1px solid #ccc;
-    border-radius: 1rem;
-    padding: 1rem;
-    margin-top: 1rem;
-    min-height: 150px;
-}
-
-.character-count {
-    margin-top: 0.5rem;
-    text-align: right;
-    font-size: 0.9rem;
-    color: #666;
-}
-
-pre {
-    background: #f8f8f8;
-    padding: 1rem;
-    border-radius: 1rem;
-    margin-top: 1rem;
-    font-size: 0.9rem;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
-
-label {
-    font-size: 0.95rem;
-    display: inline-block;
-    margin-top: 0.5rem;
-    margin-right: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  min-height: 150px;
 }
 
 input[type="checkbox"] {
-    margin-right: 0.5rem;
-    transform: scale(1.1);
+  margin-right: 0.5rem;
+  transform: scale(1.1);
 }
 
 .add-tag {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-    align-items: center;
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  align-items: center;
 }
 
 .add-tag input[type="text"] {
-    flex: 1;
+  flex: 1;
 }
 
 .button-group {
-    display: flex;
-    justify-content: center;
-    margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
 }
+
 .editor-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    background-color: #f9f9f9;
-    padding: 1rem;
-    border-radius: 1rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    justify-content: flex-start;
-    flex-direction: row;
-    align-items: center;
-  }
-  
-  .toolbar-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  
-  .editor-toolbar button {
-    background-color: #f2f2f2;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 999px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s;
-  }
-  
-  .editor-toolbar button:hover {
-    background-color: #000;
-    color: white;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  justify-content: flex-start;
+  flex-direction: row;
+  align-items: center;
+}
 
-  }.toolbar-group button.active {
-    background-color: #000;
-    color: white;
-    font-weight: bold;
-  }
-  
-  .editor-toolbar select {
-    padding: 0.4rem 0.8rem;
-    border-radius: 999px;
-    border: 1px solid #ccc;
-    font-size: 0.95rem;
-    background-color: #fff;
-  }
-  
-  .editor-toolbar select:focus {
-    outline: none;
-    border-color: #000;
-  }
-  
-  .color-picker {
-    display: flex;
-    align-items: center;
-  }
-  
-  .color-picker-label {
-    position: relative;
-    display: flex;
-    align-items: center;
-    font-size: 1.2rem;
-    gap: 0.5rem;
-    cursor: pointer;
-    padding: 0.4rem 0.8rem;
-    border-radius: 999px;
-    background-color: #f2f2f2;
-    transition: background-color 0.3s;
-  }
-  
-  .color-picker-label:hover {
-    background-color: #e0e0e0;
-  }
-  
-  .color-picker input[type="color"] {
-    appearance: none;
-    width: 1.75rem;
-    height: 1.75rem;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    padding: 0;
-  }
-  .editor-box {
-    border: 1px solid #ccc;
-    border-radius: 0.5rem;
-    margin-top: 1rem;
-    width: 750px;
-    height: 350px;
-    overflow-y: auto;
-    padding: 10px;
-    background-color: #fff;
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #333;
-  }
-  
-  .editor-box:empty::before {
-    content: attr(data-placeholder);
-    color: #aaa;
-    font-style: italic;
-  }
+.toolbar-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-  .editor-box .ProseMirror {
-    min-height: 100%;
-    height: 100%;
-    outline: none;
-  }
-  .markdown-preview {
-    font-family: "Roboto";
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #333;
-    background-color: #fefefe;
-    border: 1px solid #e0e0e0;
-    padding: 1rem;
-    border-radius: 0.75rem;
-    margin-top: 0.5rem;
-  }
+.editor-toolbar button {
+  background-color: #f2f2f2;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
 
-  .add-tag-button {
-    margin-top: 1rem;
-  }
+.editor-toolbar button:hover {
+  background-color: #000;
+  color: white;
 
-  .submit-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 1rem;
-  }
-  
+}
+
+.toolbar-group button.active {
+  background-color: #000;
+  color: white;
+  font-weight: bold;
+}
+
+.editor-toolbar select {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  background-color: #fff;
+}
+
+.editor-toolbar select:focus {
+  outline: none;
+  border-color: #000;
+}
+
+.color-picker {
+  display: flex;
+  align-items: center;
+}
+
+.color-picker-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background-color: #f2f2f2;
+  transition: background-color 0.3s;
+
+}
+
+.color-picker-label:hover {
+  background-color: #000;
+}
+
+.color-picker input[type="color"] {
+  appearance: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+}
+
+.editor-box {
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+  width: 750px;
+  height: 350px;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #fff;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+.editor-box:empty::before {
+  content: attr(data-placeholder);
+  color: #aaa;
+  font-style: italic;
+}
+
+.editor-box .ProseMirror {
+  min-height: 100%;
+  height: 100%;
+  outline: none;
+}
+
+.markdown-preview {
+  font-family: "Roboto";
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fefefe;
+  border: 1px solid #e0e0e0;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.add-tag-button {
+  margin-top: 1rem;
+}
+
+.submit-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+/* Dark Mode */
+
+.dark-mode {
+  background-color: #121212;
+  color: #f5f5f5;
+}
+
+.dark-mode .newpost-container {
+  background-color: #121212;
+  color: #f5f5f5;
+}
+
+.dark-mode form {
+  background-color: #121212;
+  color: #f5f5f5;
+}
+
+.dark-mode .editor-toolbar {
+  background-color: #333;
+  color: #f5f5f5;
+}
+
+.dark-mode button,
+.dark-mode .color-picker-label {
+  background-color: #333;
+  color: #f5f5f5;
+}
+
+.dark-mode .editor-toolbar button {
+  background-color: #333;
+}
+
+.dark-mode .editor-toolbar button:hover {
+  background-color: #f5f5f5;
+  color: #333;
+
+}
+
+.dark-mode .toolbar-group button.active {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.dark-mode .editor-box {
+  background-color: #121212;
+  color: #f5f5f5;
+  border: 1px solid #444;
+}
+
+.dark-mode .markdown-preview {
+  background-color: #121212 !important;
+  border-color: #333;
+  color: #f5f5f5 !important;
+}
+
+.dark-mode input {
+  background-color: #121212 !important;
+  border-color: #333;
+  color: #f5f5f5 !important;
+}

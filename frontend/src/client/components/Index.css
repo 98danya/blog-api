@@ -407,7 +407,6 @@ body.dark-mode {
   box-shadow: none;
 }
 
-
 .dark-mode .clear-button:hover {
   background-color: transparent !important;
   color: #fff !important;

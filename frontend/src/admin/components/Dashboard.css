@@ -97,3 +97,31 @@
   font-family: "Roboto";
   font-size: 20px;
 }
+
+/* Dark Mode */
+
+.dark-mode {
+  background-color: #121212;
+  color: #f5f5f5;
+}
+
+.dark-mode .post-title {
+  color: #f5f5f5;
+}
+
+.dark-mode .button-group .delete-button,
+.dark-mode .button-group .edit-button,
+.dark-mode .button-group .publish-button,
+.dark-mode .button-group .unpublish-button {
+  background-color: #333 !important;
+  color: #f5f5f5 !important;
+}
+
+.dark-mode .button-group .delete-button:hover,
+.dark-mode .button-group .edit-button:hover,
+.dark-mode .button-group .publish-button:hover,
+.dark-mode .button-group .unpublish-button:hover {
+  background-color: #f5f5f5 !important;
+  color: #333 !important;
+  transition: background-color 0.3s;
+}
