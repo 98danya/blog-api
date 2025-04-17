@@ -21,6 +21,7 @@ const Index = () => {
   const location = useLocation();
   const postRefs = useRef({});
   const topRef = useRef(null);
+  const [hoveredTagIndex, setHoveredTagIndex] = useState(null);
   const [visibleForm, setVisibleForm] = useState(null);
   const formSectionRef = useRef(null);
   const footerRef = useRef(null);
@@ -210,15 +211,18 @@ const Index = () => {
           style={{
             "--tag-count": tagNames.length,
             "--active-index": activeIndex,
+            "--hovered-index": hoveredTagIndex ?? activeIndex,
           }}
         >
-          {tagNames.map((tagName) => (
+          {tagNames.map((tagName, index) => (
             <button
               key={tagName}
               className={`tag-button ${
                 selectedTag === tagName ? "active" : ""
               }`}
               onClick={() => setSelectedTag(tagName)}
+              onMouseEnter={() => setHoveredTagIndex(index)}
+              onMouseLeave={() => setHoveredTagIndex(null)}
             >
               {tagName}
             </button>

@@ -126,11 +126,17 @@ export const getPostById = async (id) => {
   return await apiRequest(`/api/posts/${id}`);
 };
 
-export const registerUser = async (email, username, password) => {
+export const registerUser = async (
+  email,
+  username,
+  password,
+  isAdmin = false
+) => {
   return await apiRequest("/api/auth/register", "POST", {
     email,
     username,
     password,
+    isAdmin,
   });
 };
 

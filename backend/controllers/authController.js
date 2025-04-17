@@ -37,7 +37,7 @@ const login = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const { email, username, password } = req.body;
+  const { email, username, password, isAdmin = false } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -47,6 +47,7 @@ const register = async (req, res) => {
         email,
         username,
         password: hashedPassword,
+        isAdmin,
       },
     });
 
