@@ -7,20 +7,20 @@ const Login = ({ onSuccess }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
 
-const handleLogin = async (e) => {
-  e.preventDefault();
-  try {
-    const data = await loginUser(email, password);
-    localStorage.setItem("token", data.token);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const data = await loginUser(email, password);
+      localStorage.setItem("token", data.token);
 
-    const profile = await getUserProfile(data.token);
+      const profile = await getUserProfile(data.token);
 
-    if (onSuccess) onSuccess(profile);
-  } catch (err) {
-    setError("Login failed. Please try again.");
-    console.error(err);
-  }
-};
+      if (onSuccess) onSuccess(profile);
+    } catch (err) {
+      setError("Login failed. Please try again.");
+      console.error(err);
+    }
+  };
 
   return (
     <div className="login-container">
@@ -29,6 +29,7 @@ const handleLogin = async (e) => {
       <form onSubmit={handleLogin}>
         <input
           type="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"

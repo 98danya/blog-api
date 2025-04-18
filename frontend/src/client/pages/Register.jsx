@@ -56,7 +56,7 @@ const Register = ({ onSuccess }) => {
         />
         <input
           type="password"
-          autoComplete="current-password"
+          autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
@@ -64,7 +64,7 @@ const Register = ({ onSuccess }) => {
         />
         <input
           type="password"
-          autoComplete="current-password"
+          autoComplete="new-password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="Confirm Password"
@@ -72,7 +72,7 @@ const Register = ({ onSuccess }) => {
         />
         <input
           type="password"
-          autoComplete="current-password"
+          autoComplete="off"
           value={adminPassword}
           onChange={(e) => setAdminPassword(e.target.value)}
           placeholder="Admin Password (optional)"

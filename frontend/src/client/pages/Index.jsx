@@ -110,11 +110,11 @@ const Index = () => {
 
   useEffect(() => {
     if (!footerRef.current) return;
-  
+
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (entry.isIntersecting && visibleForm) {
+        if (entry.isIntersecting) {
           setVisibleForm(null);
         }
       },
@@ -123,13 +123,13 @@ const Index = () => {
         threshold: 0.1,
       }
     );
-  
+
     observer.observe(footerRef.current);
-  
+
     return () => {
       if (footerRef.current) observer.unobserve(footerRef.current);
     };
-  }, [visibleForm]);
+  }, []);
 
   return (
     <div className="index-container">
