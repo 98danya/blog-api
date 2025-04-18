@@ -47,11 +47,17 @@ const Index = () => {
 
     const token = localStorage.getItem("token");
     if (token) {
-      getUserProfile(token).then((profile) => {
-        setUser(profile);
-        setLoggedIn(true);
-        setIsAdmin(profile.isAdmin);
-      });
+      getUserProfile(token)
+        .then((profile) => {
+          setUser(profile);
+          setLoggedIn(true);
+          setIsAdmin(profile.isAdmin);
+        })
+        .catch((err) => {
+          console.error("Invalid or expired token:", err);
+          localStorage.removeItem("token");
+          setLoggedIn(false);
+        });
     }
   }, []);
 
@@ -104,11 +110,11 @@ const Index = () => {
 
   useEffect(() => {
     if (!footerRef.current) return;
-
+  
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && visibleForm) {
           setVisibleForm(null);
         }
       },
@@ -117,13 +123,13 @@ const Index = () => {
         threshold: 0.1,
       }
     );
-
+  
     observer.observe(footerRef.current);
-
+  
     return () => {
       if (footerRef.current) observer.unobserve(footerRef.current);
     };
-  }, []);
+  }, [visibleForm]);
 
   return (
     <div className="index-container">

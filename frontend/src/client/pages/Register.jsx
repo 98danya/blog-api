@@ -40,6 +40,7 @@ const Register = ({ onSuccess }) => {
       <form onSubmit={handleRegister}>
         <input
           type="text"
+          autoComplete="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Username"
@@ -47,6 +48,7 @@ const Register = ({ onSuccess }) => {
         />
         <input
           type="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
@@ -54,6 +56,7 @@ const Register = ({ onSuccess }) => {
         />
         <input
           type="password"
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
@@ -61,6 +64,7 @@ const Register = ({ onSuccess }) => {
         />
         <input
           type="password"
+          autoComplete="current-password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="Confirm Password"
@@ -68,6 +72,7 @@ const Register = ({ onSuccess }) => {
         />
         <input
           type="password"
+          autoComplete="current-password"
           value={adminPassword}
           onChange={(e) => setAdminPassword(e.target.value)}
           placeholder="Admin Password (optional)"

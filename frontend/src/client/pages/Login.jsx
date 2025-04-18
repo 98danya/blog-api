@@ -36,6 +36,7 @@ const handleLogin = async (e) => {
         />
         <input
           type="password"
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
